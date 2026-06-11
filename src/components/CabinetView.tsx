@@ -105,9 +105,9 @@ const styles: Record<string, React.CSSProperties> = {
     transition: 'all 0.3s ease'
   },
   activeCategoryPill: {
-    borderColor: 'var(--accent-gold)',
+    borderColor: 'var(--theme-accent)',
     color: 'var(--text-high-contrast)',
-    background: 'rgba(212, 175, 55, 0.1)'
+    background: 'var(--theme-glow)'
   },
   trophyGrid: {
     display: 'grid',
@@ -144,9 +144,9 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: 'var(--font-display)',
     fontSize: '16px',
     fontWeight: 800,
-    color: 'var(--accent-gold)',
-    background: 'rgba(212, 175, 55, 0.1)',
-    border: '1px solid var(--accent-gold)',
+    color: 'var(--theme-accent)',
+    background: 'var(--theme-glow)',
+    border: '1px solid var(--theme-accent)',
     borderRadius: '6px',
     padding: '2px 8px'
   },

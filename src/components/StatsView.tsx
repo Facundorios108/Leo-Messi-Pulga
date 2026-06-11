@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import type { SeasonStats, CareerTotals } from '../types';
+import React, { useState, useMemo, useEffect } from 'react';
+import type { SeasonStats, CareerTotals, Trophy, DetailedStats } from '../types';
 import * as rawData from '../data/messiRawData';
 
 interface StatsViewProps {
@@ -9,13 +9,21 @@ interface StatsViewProps {
     clubs: typeof rawData.clubTotals;
     internationalBreakdown: typeof rawData.internationalStatsBreakdown;
     internationalYearly: typeof rawData.internationalYearlyStats;
+    detailed?: DetailedStats;
   } | null;
+  setTheme: (theme: string) => void;
+  trophies: Trophy[];
 }
 
 type FilterType = 'all' | 'barca' | 'psg' | 'miami' | 'argentina';
 
-export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals }) => {
+export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals, setTheme, trophies }) => {
   const [filter, setFilter] = useState<FilterType>('all');
+
+  // Sync theme with active filter selection
+  useEffect(() => {
+    setTheme(filter);
+  }, [filter, setTheme]);
 
   // Dynamically calculate stats based on filter
   const filteredData = useMemo(() => {
@@ -121,6 +129,69 @@ export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals }) => {
     return Math.max(maxGoals, maxAssists, 1);
   }, [barChartData]);
 
+  // Dynamically aggregate detailed stats (Free Kicks, Penalties, Hat Tricks, MOTM)
+  const detailedStatsValues = useMemo(() => {
+    const detailed = totals?.detailed || rawData.detailedStats;
+    switch (filter) {
+      case 'barca':
+        return {
+          freeKicks: detailed.freeKicks.barca,
+          penalties: detailed.penalties.barca,
+          hatTricks: detailed.hatTricks.barca,
+          motm: detailed.motm.barca
+        };
+      case 'psg':
+        return {
+          freeKicks: detailed.freeKicks.psg,
+          penalties: detailed.penalties.psg,
+          hatTricks: detailed.hatTricks.psg,
+          motm: detailed.motm.psg
+        };
+      case 'miami':
+        return {
+          freeKicks: detailed.freeKicks.miami,
+          penalties: detailed.penalties.miami,
+          hatTricks: detailed.hatTricks.miami,
+          motm: detailed.motm.miami
+        };
+      case 'argentina':
+        return {
+          freeKicks: detailed.freeKicks.argentina,
+          penalties: detailed.penalties.argentina,
+          hatTricks: detailed.hatTricks.argentina,
+          motm: detailed.motm.argentina
+        };
+      case 'all':
+      default:
+        return {
+          freeKicks: detailed.freeKicks.career,
+          penalties: detailed.penalties.career,
+          hatTricks: detailed.hatTricks.career,
+          motm: detailed.motm.career
+        };
+    }
+  }, [filter, totals]);
+
+  // Dynamically filter trophies won in this stage
+  const filteredTrophies = useMemo(() => {
+    if (filter === 'all') {
+      return trophies.filter(t => t.category !== 'individual');
+    }
+    if (filter === 'barca') {
+      return trophies.filter(t => t.team === 'FC Barcelona');
+    }
+    if (filter === 'psg') {
+      return trophies.filter(t => t.team === 'Paris Saint-Germain');
+    }
+    if (filter === 'miami') {
+      return trophies.filter(t => t.team === 'Inter Miami CF');
+    }
+    if (filter === 'argentina') {
+      return trophies.filter(t => t.team.includes('Argentina'));
+    }
+    return [];
+  }, [filter, trophies]);
+
   // Handle active class styles
   const activeStyle = (type: FilterType) => {
     return filter === type ? styles.activeFilter : {};
@@ -130,7 +201,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals }) => {
     <div className="screen-content animated-fade-in">
       <h1 className="hero-title" style={{ marginBottom: '4px', textAlign: 'center' }}>EXPLORADOR DE STATS</h1>
       <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '13.5px', marginBottom: '20px' }}>
-        Estadísticas oficiales consolidadas en base de datos.
+        Estadísticas oficiales consolidadas en tiempo real.
       </p>
 
       {/* Filter Pills */}
@@ -144,7 +215,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals }) => {
 
       {/* Radial Metric Rings / Core Stats */}
       <section className="glass-panel" style={styles.mainMetricsCard}>
-        <p className="label-caps" style={{ color: 'var(--accent-gold)', marginBottom: '16px' }}>{filteredData.label}</p>
+        <p className="label-caps" style={{ color: 'var(--theme-accent)', marginBottom: '16px', transition: 'color 0.5s ease' }}>{filteredData.label}</p>
         <div style={styles.radialContainer}>
           {/* Matches Ring */}
           <div style={styles.radialItem}>
@@ -199,6 +270,26 @@ export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals }) => {
         </div>
       </section>
 
+      {/* Detailed Stats Panel */}
+      <section style={styles.detailedGrid}>
+        <div className="glass-panel" style={styles.detailedCard}>
+          <span style={styles.detailedLabel}>Tiros Libres 🎯</span>
+          <span style={styles.detailedVal}>{detailedStatsValues.freeKicks}</span>
+        </div>
+        <div className="glass-panel" style={styles.detailedCard}>
+          <span style={styles.detailedLabel}>Penales 🥅</span>
+          <span style={styles.detailedVal}>{detailedStatsValues.penalties}</span>
+        </div>
+        <div className="glass-panel" style={styles.detailedCard}>
+          <span style={styles.detailedLabel}>Hat-Tricks ⚽🎩</span>
+          <span style={styles.detailedVal}>{detailedStatsValues.hatTricks}</span>
+        </div>
+        <div className="glass-panel" style={styles.detailedCard}>
+          <span style={styles.detailedLabel}>Premios MOTM 🌟</span>
+          <span style={styles.detailedVal}>{detailedStatsValues.motm}</span>
+        </div>
+      </section>
+
       {/* Performance Chart */}
       <section className="glass-panel" style={styles.chartCard}>
         <h3 className="section-title" style={{ fontSize: '1.2rem', marginBottom: '20px' }}>RENDIMIENTO DE TEMPORADAS RECIENTES</h3>
@@ -210,8 +301,8 @@ export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals }) => {
                 <div 
                   style={{ 
                     ...styles.barFill, 
-                    height: `${(data.goals / maxVal) * 100}%`,
-                    background: 'linear-gradient(to top, var(--accent-gold), rgba(212, 175, 55, 0.4))'
+                    height: `${(data.goals / maxVal) * 82}%`,
+                    background: 'linear-gradient(to top, var(--theme-accent), rgba(255, 255, 255, 0.1))'
                   }} 
                   title={`${data.goals} Goles`}
                 >
@@ -221,7 +312,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals }) => {
                 <div 
                   style={{ 
                     ...styles.barFill, 
-                    height: `${(data.assists / maxVal) * 100}%`,
+                    height: `${(data.assists / maxVal) * 82}%`,
                     background: 'linear-gradient(to top, var(--accent-miami-pink), rgba(247, 181, 205, 0.4))'
                   }} 
                   title={`${data.assists} Asistencias`}
@@ -237,7 +328,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals }) => {
         </div>
         <div style={styles.chartLegend}>
           <div style={styles.legendItem}>
-            <div style={{ ...styles.legendDot, background: 'var(--accent-gold)' }}></div>
+            <div style={{ ...styles.legendDot, background: 'var(--theme-accent)' }}></div>
             <span>Goles</span>
           </div>
           <div style={styles.legendItem}>
@@ -246,6 +337,26 @@ export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals }) => {
           </div>
         </div>
       </section>
+
+      {/* Trophies Summary */}
+      {filteredTrophies.length > 0 && (
+        <section className="glass-panel" style={styles.trophyCardSection}>
+          <h3 className="section-title" style={{ fontSize: '1.2rem', marginBottom: '16px' }}>
+            TÍTULOS GANADOS EN ESTA ETAPA ({filteredTrophies.reduce((acc, t) => acc + t.count, 0)})
+          </h3>
+          <div style={styles.trophyListContainer}>
+            {filteredTrophies.map(t => (
+              <div key={t.id} style={styles.trophyItem}>
+                <span style={styles.trophyEmoji}>🏆</span>
+                <div style={styles.trophyTextContainer}>
+                  <span style={styles.trophyTitleText}>{t.title}</span>
+                  <span style={styles.trophyCountText}>{t.count} {t.count > 1 ? 'títulos' : 'título'}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 };
@@ -277,7 +388,7 @@ const styles: Record<string, React.CSSProperties> = {
   activeFilter: {
     borderColor: 'var(--theme-accent)',
     color: 'var(--text-high-contrast)',
-    background: 'rgba(212, 175, 55, 0.1)'
+    background: 'var(--theme-glow)'
   },
   mainMetricsCard: {
     padding: '24px 20px',
@@ -408,7 +519,17 @@ const styles: Record<string, React.CSSProperties> = {
     transition: 'height 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)'
   },
   barValue: {
-    display: 'none', // Hover displays could be added but keep clean for mobile
+    display: 'block',
+    position: 'absolute',
+    top: '-16px',
+    fontSize: '8px',
+    fontFamily: 'var(--font-mono)',
+    color: 'var(--text-high-contrast)',
+    fontWeight: 700,
+    width: '20px',
+    textAlign: 'center',
+    left: '50%',
+    transform: 'translateX(-50%)'
   },
   chartLabel: {
     fontFamily: 'var(--font-mono)',
@@ -435,5 +556,78 @@ const styles: Record<string, React.CSSProperties> = {
     width: '8px',
     height: '8px',
     borderRadius: '50%'
+  },
+  detailedGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '12px',
+    marginBottom: '20px'
+  },
+  detailedCard: {
+    padding: '16px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+    background: 'rgba(255, 255, 255, 0.02)',
+    border: '1px solid rgba(255, 255, 255, 0.05)'
+  },
+  detailedLabel: {
+    fontFamily: 'var(--font-display)',
+    fontSize: '11px',
+    fontWeight: 600,
+    color: 'var(--text-muted)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    marginBottom: '6px'
+  },
+  detailedVal: {
+    fontFamily: 'var(--font-display)',
+    fontSize: '1.6rem',
+    fontWeight: 800,
+    color: 'var(--theme-accent)'
+  },
+  trophyCardSection: {
+    padding: '20px',
+    marginBottom: '20px'
+  },
+  trophyListContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    maxHeight: '220px',
+    overflowY: 'auto',
+    paddingRight: '4px'
+  },
+  trophyItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '10px 14px',
+    background: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: '10px',
+    border: '1px solid rgba(255, 255, 255, 0.04)'
+  },
+  trophyEmoji: {
+    fontSize: '20px'
+  },
+  trophyTextContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1
+  },
+  trophyTitleText: {
+    fontFamily: 'var(--font-sans)',
+    fontSize: '13px',
+    fontWeight: 600,
+    color: 'var(--text-high-contrast)'
+  },
+  trophyCountText: {
+    fontFamily: 'var(--font-mono)',
+    fontSize: '11px',
+    color: 'var(--theme-accent)',
+    fontWeight: 600,
+    marginTop: '2px'
   }
 };

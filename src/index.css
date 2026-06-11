@@ -51,6 +51,73 @@
   --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* --- Theme Variable Scopes --- */
+.theme-global {
+  --theme-accent: var(--accent-gold);
+  --theme-glow: var(--accent-gold-glow);
+}
+
+.theme-barca {
+  --theme-accent: #ffed00; /* Barça Yellow */
+  --theme-glow: rgba(165, 0, 68, 0.3); /* Barça Red glow */
+  --color-space-black: #050b14;
+  --color-slate-deep: #0f1030; /* Barça Deep Blue */
+  --color-slate-light: #181b4d;
+  --glass-bg: rgba(15, 16, 48, 0.75);
+}
+
+.theme-psg {
+  --theme-accent: #e30613; /* PSG Red */
+  --theme-glow: rgba(0, 65, 125, 0.35); /* PSG Navy Blue glow */
+  --color-space-black: #020712;
+  --color-slate-deep: #061430; /* PSG Deep Blue */
+  --color-slate-light: #0d224d;
+  --glass-bg: rgba(6, 20, 48, 0.75);
+}
+
+.theme-miami {
+  --theme-accent: #f7b5cd; /* Inter Miami Pink */
+  --theme-glow: rgba(247, 181, 205, 0.3);
+  --color-space-black: #050506;
+  --color-slate-deep: #121214; /* Inter Miami Charcoal Black */
+  --color-slate-light: #1d1e22;
+  --glass-bg: rgba(18, 18, 20, 0.8);
+}
+
+.theme-argentina {
+  --theme-accent: #74acdf; /* Argentina Albiceleste */
+  --theme-glow: rgba(116, 172, 223, 0.35);
+  --color-space-black: #040a12;
+  --color-slate-deep: #0c1828; /* AFA Deep Blue */
+  --color-slate-light: #162a45;
+  --glass-bg: rgba(12, 24, 40, 0.75);
+}
+
+/* --- Smooth Theme Transitions --- */
+.app-container,
+body,
+.glass-panel,
+.app-header,
+.bottom-nav,
+.nav-item,
+.nav-item svg,
+.radial-number,
+.bar-fill,
+button,
+span,
+h1,
+h2,
+h3,
+h4,
+p {
+  transition: background-color 0.5s ease,
+              background-image 0.5s ease,
+              border-color 0.5s ease,
+              color 0.5s ease,
+              box-shadow 0.5s ease,
+              transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
 /* Base Styles */
 * {
   box-sizing: border-box;

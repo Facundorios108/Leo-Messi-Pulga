@@ -30,7 +30,8 @@ export async function seedDatabaseIfNeeded() {
       career: rawData.careerTotals,
       clubs: rawData.clubTotals,
       internationalBreakdown: rawData.internationalStatsBreakdown,
-      internationalYearly: rawData.internationalYearlyStats
+      internationalYearly: rawData.internationalYearlyStats,
+      detailed: rawData.detailedStats
     });
     
     // Seed trophies

@@ -16,6 +16,21 @@ export interface CareerTotals {
   titles: number;
 }
 
+export interface DetailedStatBreakdown {
+  career: number;
+  barca: number;
+  psg: number;
+  miami: number;
+  argentina: number;
+}
+
+export interface DetailedStats {
+  freeKicks: DetailedStatBreakdown;
+  penalties: DetailedStatBreakdown;
+  hatTricks: DetailedStatBreakdown;
+  motm: DetailedStatBreakdown;
+}
+
 export interface SeasonStats {
   season: string;
   team: string;

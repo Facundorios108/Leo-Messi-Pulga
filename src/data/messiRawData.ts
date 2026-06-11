@@ -24,6 +24,13 @@ export const clubTotals = {
   "Inter Miami CF": { appearances: 101, goals: 89, assists: 59 }
 };
 
+export const detailedStats = {
+  freeKicks: { career: 71, barca: 50, psg: 2, miami: 8, argentina: 11 },
+  penalties: { career: 114, barca: 83, psg: 2, miami: 5, argentina: 24 },
+  hatTricks: { career: 60, barca: 47, psg: 0, miami: 3, argentina: 10 },
+  motm: { career: 450, barca: 366, psg: 20, miami: 15, argentina: 49 }
+};
+
 export const seasonsStats: SeasonStats[] = [
   // Barcelona
   { season: "2004-05", team: "FC Barcelona", competition: "La Liga", appearances: 7, goals: 1, assists: 0 },

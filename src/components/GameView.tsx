@@ -60,7 +60,7 @@ export const GameView: React.FC<GameViewProps> = ({ questions }) => {
       <div className="screen-content animated-fade-in" style={{ textAlign: 'center', justifyContent: 'center' }}>
         <div className="glass-panel" style={styles.resultsCard}>
           <span style={{ fontSize: '48px' }}>🏆</span>
-          <h2 className="section-title" style={{ color: 'var(--accent-gold)', marginTop: '12px', marginBottom: '8px' }}>TRIVIA FINALIZADA</h2>
+          <h2 className="section-title" style={{ color: 'var(--theme-accent)', marginTop: '12px', marginBottom: '8px' }}>TRIVIA FINALIZADA</h2>
           <p style={{ color: 'var(--text-body)', fontSize: '15px', marginBottom: '24px' }}>
             Has completado la Trivia del GOAT.
           </p>
@@ -198,7 +198,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: 'var(--font-mono)'
   },
   scoreTracker: {
-    color: 'var(--accent-gold)'
+    color: 'var(--theme-accent)'
   },
   progressBarTrack: {
     height: '6px',
@@ -208,15 +208,15 @@ const styles: Record<string, React.CSSProperties> = {
   },
   progressBarFill: {
     height: '100%',
-    background: 'linear-gradient(to right, var(--accent-albiceleste), var(--accent-gold))',
+    background: 'linear-gradient(to right, var(--theme-accent), var(--theme-accent))',
     borderRadius: '3px',
     transition: 'width 0.4s ease'
   },
   questionCard: {
     padding: '24px 20px',
     marginBottom: '20px',
-    borderLeft: '4px solid var(--accent-gold)',
-    boxShadow: '0 8px 32px 0 rgba(212, 175, 55, 0.04)'
+    borderLeft: '4px solid var(--theme-accent)',
+    boxShadow: '0 8px 32px 0 var(--theme-glow)'
   },
   questionText: {
     fontSize: '1.05rem',
@@ -260,9 +260,9 @@ const styles: Record<string, React.CSSProperties> = {
     color: 'var(--text-body)'
   },
   selectedOption: {
-    borderColor: 'var(--accent-gold)',
-    background: 'rgba(212, 175, 55, 0.06)',
-    boxShadow: '0 0 16px rgba(212, 175, 55, 0.08)'
+    borderColor: 'var(--theme-accent)',
+    background: 'var(--theme-glow)',
+    boxShadow: '0 0 16px var(--theme-glow)'
   },
   correctOption: {
     borderColor: '#10b981',
@@ -287,10 +287,10 @@ const styles: Record<string, React.CSSProperties> = {
   actionButton: {
     width: '100%',
     padding: '16px',
-    border: '1px solid var(--accent-gold)',
+    border: '1px solid var(--theme-accent)',
     borderRadius: '12px',
-    background: 'var(--accent-gold-glow)',
-    color: 'var(--accent-gold)',
+    background: 'var(--theme-glow)',
+    color: 'var(--theme-accent)',
     fontSize: '12px',
     fontWeight: 700,
     fontFamily: 'var(--font-display)',
@@ -302,7 +302,7 @@ const styles: Record<string, React.CSSProperties> = {
   feedbackCard: {
     padding: '16px',
     background: 'rgba(5, 7, 12, 0.4)',
-    borderLeft: '4px solid var(--accent-albiceleste)'
+    borderLeft: '4px solid var(--theme-accent)'
   },
   explanationText: {
     fontSize: '12px',
@@ -319,17 +319,17 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100px',
     height: '100px',
     borderRadius: '50%',
-    border: '3px solid var(--accent-gold)',
-    background: 'var(--accent-gold-glow)',
+    border: '3px solid var(--theme-accent)',
+    background: 'var(--theme-glow)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 0 24px rgba(212, 175, 55, 0.15)'
+    boxShadow: '0 0 24px var(--theme-glow)'
   },
   scoreText: {
     fontFamily: 'var(--font-display)',
     fontSize: '1.5rem',
     fontWeight: 800,
-    color: 'var(--accent-gold)'
+    color: 'var(--theme-accent)'
   }
 };

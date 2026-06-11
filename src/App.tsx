@@ -51,27 +51,16 @@ function App() {
     loadData();
   }, []);
 
+  const [activeTheme, setActiveTheme] = useState<string>('global');
+
   // Contextual theme accent swapper
   useEffect(() => {
-    const root = document.documentElement;
     if (currentTab === 'timeline') {
-      // Albiceleste theme for Argentina international timeline
-      root.style.setProperty('--theme-accent', 'var(--accent-albiceleste)');
-      root.style.setProperty('--theme-glow', 'var(--accent-albiceleste-glow)');
+      setActiveTheme('argentina');
     } else if (currentTab === 'stats') {
-      root.style.setProperty('--theme-accent', 'var(--accent-albiceleste)');
-      root.style.setProperty('--theme-glow', 'var(--accent-albiceleste-glow)');
-    } else if (currentTab === 'cabinet') {
-      // Gold theme for trophy cabinet
-      root.style.setProperty('--theme-accent', 'var(--accent-gold)');
-      root.style.setProperty('--theme-glow', 'var(--accent-gold-glow)');
-    } else if (currentTab === 'game') {
-      root.style.setProperty('--theme-accent', 'var(--accent-gold)');
-      root.style.setProperty('--theme-glow', 'var(--accent-gold-glow)');
+      // StatsView handles setting the active theme based on selected filter
     } else {
-      // Default gold for home dashboard
-      root.style.setProperty('--theme-accent', 'var(--accent-gold)');
-      root.style.setProperty('--theme-glow', 'var(--accent-gold-glow)');
+      setActiveTheme('global');
     }
   }, [currentTab]);
 
@@ -79,7 +68,7 @@ function App() {
   const renderView = () => {
     switch (currentTab) {
       case 'stats':
-        return <StatsView seasons={seasons} totals={totals} />;
+        return <StatsView seasons={seasons} totals={totals} setTheme={setActiveTheme} trophies={trophies} />;
       case 'timeline':
         return <TimelineView milestones={milestones} />;
       case 'cabinet':
@@ -112,7 +101,7 @@ function App() {
   }
 
   return (
-    <div className="app-container">
+    <div className={`app-container theme-${activeTheme}`}>
       {/* PWA custom install prompt banner */}
       <PWAInstallPrompt />
 
