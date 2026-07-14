@@ -1,9 +1,33 @@
 import React, { useState, useEffect } from 'react';
 
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[];
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed';
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
+}
+
+const detectIOS = () => {
+  if (typeof window === 'undefined') return { isAppleiOS: false, isSafari: false };
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  const isAppleiOS = /iphone|ipad|ipod/.test(userAgent);
+  const isSafari = /safari/.test(userAgent) && !/crios/.test(userAgent);
+  return { isAppleiOS, isSafari };
+};
+
 export const PWAInstallPrompt: React.FC = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showPrompt, setShowPrompt] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+  const { isAppleiOS, isSafari } = detectIOS();
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isIOS] = useState(isAppleiOS && isSafari);
+  const [showPrompt, setShowPrompt] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    if (window.matchMedia('(display-mode: standalone)').matches) return false;
+    const isDismissed = localStorage.getItem('pwa-install-dismissed');
+    if (isDismissed) return false;
+    return isAppleiOS && isSafari;
+  });
 
   useEffect(() => {
     // 1. Detect if already installed/standalone
@@ -18,21 +42,11 @@ export const PWAInstallPrompt: React.FC = () => {
     // 3. Listen for Android/Chrome install prompt
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e);
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
       setShowPrompt(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    // 4. Detect iOS
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const isAppleiOS = /iphone|ipad|ipod/.test(userAgent);
-    const isSafari = /safari/.test(userAgent) && !/crios/.test(userAgent); // not chrome iOS
-    
-    if (isAppleiOS && isSafari) {
-      setIsIOS(true);
-      setShowPrompt(true);
-    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -41,7 +55,7 @@ export const PWAInstallPrompt: React.FC = () => {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
-    deferredPrompt.prompt();
+    await deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     console.log(`User response to install prompt: ${outcome}`);
     setDeferredPrompt(null);

@@ -28,7 +28,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ milestones }) => {
       </p>
 
       {/* Timeline Layout */}
-      <div style={styles.timelineContainer}>
+      <div className="timeline-container-animate" style={styles.timelineContainer}>
         {/* Blue Rail */}
         <div style={styles.blueRail}></div>
 

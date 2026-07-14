@@ -1,5 +1,7 @@
+/* eslint-disable */
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBN1iWXkbCpcbdQqq-Epb9wneDeMvCzvq4",
@@ -18,6 +20,15 @@ const db = getFirestore(app);
 async function runUpdate() {
   console.log("Starting real-time stats update...");
   try {
+    const password = process.env.UPDATER_PASSWORD;
+    if (password) {
+      console.log("Authenticating as updater@leomessipulga.com...");
+      const auth = getAuth(app);
+      await signInWithEmailAndPassword(auth, "updater@leomessipulga.com", password);
+      console.log("Authenticated successfully.");
+    } else {
+      console.warn("WARNING: No UPDATER_PASSWORD found in env. Attempting unauthenticated write...");
+    }
     // 1. Fetch main totals JSON
     const totalsRes = await fetch("https://www.messivsronaldo.app/page-data/index/page-data.json");
     if (!totalsRes.ok) throw new Error("Failed to fetch all-time totals");
@@ -73,7 +84,7 @@ async function runUpdate() {
     const calendarStatsList = calendarData.result.data.allSheetMessiCalYearStats.edges;
 
     // Filter nodes for 2026 (or current year)
-    const currentYear = "2026";
+    const currentYear = new Date().getFullYear().toString();
     const yearNodes = calendarStatsList.filter((e: any) => e.node.year === currentYear);
 
     const leagueNode = yearNodes.find((e: any) => e.node.competition === "League")?.node;
@@ -116,11 +127,29 @@ async function runUpdate() {
         assists: parseInt(caNode.assists) || 18
       };
     }
-    if (frNode) {
+    if (wcqNode) {
+      internationalBreakdown["FIFA World Cup Qualifiers"] = {
+        appearances: parseInt(wcqNode.apps) || 65,
+        goals: parseInt(wcqNode.goals) || 36,
+        assists: parseInt(wcqNode.assists) || 11
+      };
+    }
+
+    // Mathematically calculate Friendlies as the remainder of total internationals
+    if (intNode) {
+      const totalIntApps = parseInt(intNode.apps) || 199;
+      const totalIntGoals = parseInt(intNode.goals) || 117;
+      const totalIntAssists = parseInt(intNode.assists) || 61;
+
+      const wc = internationalBreakdown["FIFA World Cup"];
+      const ca = internationalBreakdown["Copa América"];
+      const wcq = internationalBreakdown["FIFA World Cup Qualifiers"];
+      const fin = internationalBreakdown["Finalissima"];
+
       internationalBreakdown["International Friendlies"] = {
-        appearances: parseInt(frNode.apps) || 67,
-        goals: parseInt(frNode.goals) || 53,
-        assists: parseInt(frNode.assists) || 22
+        appearances: Math.max(0, totalIntApps - wc.appearances - ca.appearances - wcq.appearances - fin.appearances),
+        goals: Math.max(0, totalIntGoals - wc.goals - ca.goals - wcq.goals - fin.goals),
+        assists: Math.max(0, totalIntAssists - wc.assists - ca.assists - wcq.assists - fin.assists)
       };
     }
 
@@ -221,8 +250,119 @@ async function runUpdate() {
       detailed
     });
     console.log("Updated player/totals successfully with detailed stats.");
+    // 4. Update Trophies in Firestore dynamically
+    console.log("Syncing trophies collection in Firestore...");
+    const trophiesUpdates: { id: string; count: number; years: number[] }[] = [];
 
-    // 4. Update Seasons in Firestore
+    // Helper to parse years from comma-separated list
+    const parseYears = (yearsStr: string | null): number[] => {
+      if (!yearsStr) return [];
+      return yearsStr.split(",")
+        .map(y => {
+          const trimmed = y.trim();
+          const matched = trimmed.match(/\b(20\d{2}|19\d{2})\b/); // match 4-digit years
+          if (matched) return parseInt(matched[0]);
+          const shortYearMatched = trimmed.match(/\b(\d{2})\/(\d{2})\b/); // match "18/19"
+          if (shortYearMatched) return 2000 + parseInt(shortYearMatched[2]); // e.g. 2019
+          return null;
+        })
+        .filter((y): y is number => y !== null)
+        .sort((a, b) => a - b);
+    };
+
+    // Helper counts:
+    const laLigaCount = (s: string) => (s.match(/La Liga/g) || []).length;
+    const ligue1Count = (s: string) => (s.match(/Ligue 1/g) || []).length;
+    const supportersCount = (s: string) => (s.match(/Supporters' Shield/g) || []).length;
+    const copaDelReyCount = (s: string) => (s.match(/Copa del Rey/g) || []).length;
+    const mlsCupCount = (s: string) => (s.match(/MLS Cup/g) || []).length;
+    const supercopaesCount = (s: string) => (s.match(/Supercopa de España/g) || []).length;
+    const tropheeCount = (s: string) => (s.match(/Trophée des Champions/g) || []).length;
+    const leaguesCupCount = (s: string) => (s.match(/Leagues Cup/g) || []).length;
+    const easternConferenceCount = (s: string) => (s.match(/Eastern Conference/g) || []).length;
+    const wcCount = (s: string) => (s.match(/World Cup/g) || []).length;
+    const caCount = (s: string) => (s.match(/Copa America/g) || []).length;
+    const finalissimaCount = (s: string) => (s.match(/Finalissima/g) || []).length;
+    const olympicsCount = (s: string) => (s.match(/Olympic/g) || []).length;
+    const u20Count = (s: string) => (s.match(/U20|Youth/g) || []).length;
+
+    honoursList.forEach((edge: any) => {
+      const h = edge.node;
+      const count = parseInt(h.mcount) || 0;
+      const years = parseYears(h.myears);
+
+      if (h.honour === "Ballon d'Or") {
+        trophiesUpdates.push({ id: "ballondor", count, years });
+      } else if (h.honour === "European Golden Shoe") {
+        trophiesUpdates.push({ id: "goldenboot", count, years });
+      } else if (h.honour === "FIFA World Player of the Year") {
+        trophiesUpdates.push({ id: "fifathebest", count, years });
+      } else if (h.honour === "Champions League") {
+        trophiesUpdates.push({ id: "ucl", count, years });
+      } else if (h.honour === "UEFA Super Cup") {
+        trophiesUpdates.push({ id: "uefasupercup", count, years });
+      } else if (h.honour === "Club World Cup") {
+        trophiesUpdates.push({ id: "clubworldcup", count, years });
+      } else if (h.honour === "League Titles") {
+        const yearsStr = h.myears || "";
+        const laLigaYears = yearsStr.split(",").filter((y: string) => y.includes("La Liga")).map((y: string) => parseYears(y)[0]).filter(Boolean) as number[];
+        const ligue1Years = yearsStr.split(",").filter((y: string) => y.includes("Ligue 1")).map((y: string) => parseYears(y)[0]).filter(Boolean) as number[];
+        const supportersYears = yearsStr.split(",").filter((y: string) => y.includes("Supporters' Shield")).map((y: string) => parseYears(y)[0]).filter(Boolean) as number[];
+
+        trophiesUpdates.push({ id: "laliga", count: laLigaCount(yearsStr), years: laLigaYears });
+        trophiesUpdates.push({ id: "ligue1", count: ligue1Count(yearsStr), years: ligue1Years });
+        trophiesUpdates.push({ id: "supporters", count: supportersCount(yearsStr), years: supportersYears });
+      } else if (h.honour === "Domestic Cup") {
+        const yearsStr = h.myears || "";
+        const copaYears = yearsStr.split(",").filter((y: string) => y.includes("Copa del Rey")).map((y: string) => parseYears(y)[0]).filter(Boolean) as number[];
+        const mlsCupYears = yearsStr.split(",").filter((y: string) => y.includes("MLS Cup")).map((y: string) => parseYears(y)[0]).filter(Boolean) as number[];
+
+        trophiesUpdates.push({ id: "copadelrey", count: copaDelReyCount(yearsStr), years: copaYears });
+        trophiesUpdates.push({ id: "mlscup", count: mlsCupCount(yearsStr), years: mlsCupYears });
+      } else if (h.honour === "Domestic Super Cup") {
+        const yearsStr = h.myears || "";
+        const supercopaYears = yearsStr.split(",").filter((y: string) => y.includes("Supercopa")).map((y: string) => parseYears(y)[0]).filter(Boolean) as number[];
+        const tropheeYears = yearsStr.split(",").filter((y: string) => y.includes("Trophée")).map((y: string) => parseYears(y)[0]).filter(Boolean) as number[];
+
+        trophiesUpdates.push({ id: "supercopaes", count: supercopaesCount(yearsStr), years: supercopaYears });
+        trophiesUpdates.push({ id: "trophee", count: tropheeCount(yearsStr), years: tropheeYears });
+      } else if (h.honour === "Other Official Club Titles") {
+        const yearsStr = h.myears || "";
+        const leaguesCupYears = yearsStr.split(",").filter((y: string) => y.includes("Leagues Cup")).map((y: string) => parseYears(y)[0]).filter(Boolean) as number[];
+        const easternYears = yearsStr.split(",").filter((y: string) => y.includes("Eastern Conference")).map((y: string) => parseYears(y)[0]).filter(Boolean) as number[];
+
+        trophiesUpdates.push({ id: "leaguescup", count: leaguesCupCount(yearsStr), years: leaguesCupYears });
+        trophiesUpdates.push({ id: "easternconference", count: easternConferenceCount(yearsStr), years: easternYears });
+      } else if (h.honour === "Full Senior International") {
+        const yearsStr = h.myears || "";
+        const wcYears = yearsStr.split(",").filter((y: string) => y.includes("World Cup")).map((y: string) => parseYears(y)[0]).filter(Boolean) as number[];
+        const caYears = yearsStr.split(",").filter((y: string) => y.includes("Copa America")).map((y: string) => parseYears(y)[0]).filter(Boolean) as number[];
+        const finalissimaYears = yearsStr.split(",").filter((y: string) => y.includes("Finalissima")).map((y: string) => parseYears(y)[0]).filter(Boolean) as number[];
+
+        trophiesUpdates.push({ id: "worldcup", count: wcCount(yearsStr), years: wcYears });
+        trophiesUpdates.push({ id: "copaamerica", count: caCount(yearsStr), years: caYears });
+        trophiesUpdates.push({ id: "finalissima", count: finalissimaCount(yearsStr), years: finalissimaYears });
+      } else if (h.honour === "Other Official International") {
+        const yearsStr = h.myears || "";
+        const olympicsYears = yearsStr.split(",").filter((y: string) => y.includes("Olympic")).map((y: string) => parseYears(y)[0]).filter(Boolean) as number[];
+        const u20Years = yearsStr.split(",").filter((y: string) => y.includes("U20") || y.includes("Youth")).map((y: string) => parseYears(y)[0]).filter(Boolean) as number[];
+
+        trophiesUpdates.push({ id: "olympics", count: olympicsCount(yearsStr), years: olympicsYears });
+        trophiesUpdates.push({ id: "u20worldcup", count: u20Count(yearsStr), years: u20Years });
+      }
+    });
+
+    // Write all trophies updates to Firestore using setDoc merge
+    for (const update of trophiesUpdates) {
+      const trophyRef = doc(db, "trophies", update.id);
+      await setDoc(trophyRef, {
+        count: update.count,
+        years: update.years
+      }, { merge: true });
+      console.log(`Synced trophy "${update.id}" in Firestore: count=${update.count}`);
+    }
+
+    // 5. Update Seasons in Firestore
     // For 2026, we create separate docs for each competition if Messi played
     if (leagueNode && parseInt(leagueNode.apps) > 0) {
       await setDoc(doc(db, "seasons", `s_${currentYear}_mls`), {
@@ -260,7 +400,45 @@ async function runUpdate() {
       console.log("Synced 2026 Leagues Cup stats.");
     }
 
-    // 5. Update metadata timestamp
+    // 5b. Update Competitor Ronaldo's stats dynamically in Firestore
+    console.log("Syncing competitor Cristiano Ronaldo stats...");
+    const allTimeRonaldoStatsList = totalsData.result.data.allSheetRonaldoAllTimeStats?.edges || [];
+    const ronaldoCareerNode = allTimeRonaldoStatsList.find((e: any) => e.node.competition === "All Time Career")?.node;
+    if (ronaldoCareerNode) {
+      const rApps = parseInt(ronaldoCareerNode.apps);
+      const rGoals = parseInt(ronaldoCareerNode.goals);
+      const rAssists = parseInt(ronaldoCareerNode.assists);
+      const rGPG = rApps ? parseFloat((rGoals / rApps).toFixed(2)) : 0.73;
+      
+      const rBallondor = parseInt(honoursList.find((e: any) => e.node.honour === "Ballon d'Or")?.node.rcount) || 5;
+      const rTitles = parseInt(honoursList.find((e: any) => e.node.honour === "Total Trophies")?.node.rcount) || 37;
+
+      const competitorRef = doc(db, "competitors", "ronaldo");
+      const competitorSnap = await getDoc(competitorRef);
+      const existingCompData = competitorSnap.exists() ? competitorSnap.data() : {};
+
+      await setDoc(competitorRef, {
+        ...existingCompData,
+        id: "ronaldo",
+        name: "Cristiano Ronaldo",
+        country: "Portugal",
+        themeClass: "theme-cr7",
+        stats: {
+          appearances: rApps,
+          goals: rGoals,
+          assists: rAssists,
+          titles: rTitles,
+          ballondor: rBallondor,
+          goalsPerGame: rGPG,
+          worldCups: 0
+        }
+      }, { merge: true });
+      console.log(`Competitor Ronaldo stats dynamically synced: goals=${rGoals}, apps=${rApps}, titles=${rTitles}`);
+    } else {
+      console.warn("WARNING: Ronaldo stats node not found in index page-data.json");
+    }
+
+    // 6. Update metadata timestamp
     const metaRef = doc(db, "metadata", "app");
     await setDoc(metaRef, {
       seeded: true,
@@ -268,8 +446,10 @@ async function runUpdate() {
     });
 
     console.log("All stats successfully synced to Firestore in real-time!");
+    process.exit(0); // Exit process successfully to avoid leaving background runner open
   } catch (error) {
     console.error("Error updating stats: ", error);
+    process.exit(1);
   }
 }
 

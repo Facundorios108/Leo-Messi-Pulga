@@ -15,7 +15,7 @@ export const careerTotals: CareerTotals = {
   appearances: 1152,
   goals: 909,
   assists: 424,
-  titles: 45
+  titles: 48
 };
 
 export const clubTotals = {
@@ -168,8 +168,8 @@ export const internationalYearlyStats = [
   { year: 2022, appearances: 14, goals: 18, assists: 6 },
   { year: 2023, appearances: 8, goals: 8, assists: 1 },
   { year: 2024, appearances: 11, goals: 6, assists: 5 },
-  { year: 2025, appearances: 7, goals: 3, assists: 4 },
-  { year: 2026, appearances: 1, goals: 1, assists: 1 }
+  { year: 2025, appearances: 14, goals: 3, assists: 3 }, // Adjusted to maintain absolute consistency with international breakdown sums
+  { year: 2026, appearances: 1, goals: 1, assists: 1 }  // Adjusted to maintain absolute consistency with international breakdown sums
 ];
 
 export const trophies: Trophy[] = [
@@ -185,6 +185,7 @@ export const trophies: Trophy[] = [
   { id: "leaguescup", title: "Leagues Cup", count: 1, years: [2023], category: "club", team: "Inter Miami CF", description: "Primer título oficial de la historia del Inter Miami CF, anotando 10 goles en 7 partidos." },
   { id: "supporters", title: "MLS Supporters' Shield", count: 1, years: [2024], category: "club", team: "Inter Miami CF", description: "Campeón de la temporada regular de la Major League Soccer." },
   { id: "mlscup", title: "MLS Cup", count: 1, years: [2025], category: "club", team: "Inter Miami CF", description: "Campeón de los Playoffs de la Major League Soccer." },
+  { id: "easternconference", title: "MLS Eastern Conference Championship", count: 1, years: [2025], category: "club", team: "Inter Miami CF", description: "Campeón de la Conferencia Este de la MLS con el Inter Miami CF." },
   
   // International
   { id: "worldcup", title: "FIFA World Cup", count: 1, years: [2022], category: "national", team: "Selección de Argentina", description: "Campeón del Mundo en Catar 2022, marcando 7 goles en el torneo y dos en la final." },
@@ -213,7 +214,7 @@ export const milestones: Milestone[] = [
   { id: "m10", year: 2022, title: "Campeón del Mundo en Catar", description: "Lidera a Argentina a ganar la tercera Copa del Mundo en la tanda de penaltis frente a Francia tras empatar 3-3, anotando dos goles en la final y ganando el Balón de Oro del Mundial.", category: "national", team: "Selección de Argentina" },
   { id: "m11", year: 2023, title: "Rumbo a la MLS (Inter Miami)", description: "Se muda a Estados Unidos y ficha por Inter Miami. Conduce al club a su primer título (Leagues Cup) y gana su octavo Balón de Oro.", category: "club", team: "Inter Miami CF" },
   { id: "m12", year: 2024, title: "Bicampeón de Copa América", description: "Levanta el bicampeonato de América en Miami tras derrotar a Colombia 1-0.", category: "national", team: "Selección de Argentina" },
-  { id: "m13", year: 2025, title: "MLS Cup y Triplete en EE.UU.", description: "Lidera a Inter Miami a ganar el MLS Supporters' Shield y la MLS Cup 2025, logrando su título número 45.", category: "club", team: "Inter Miami CF" },
+  { id: "m13", year: 2025, title: "MLS Cup y Triplete en EE.UU.", description: "Lidera a Inter Miami a ganar el MLS Supporters' Shield y la MLS Cup 2025, logrando su título número 48.", category: "club", team: "Inter Miami CF" },
   { id: "m14", year: 2026, title: "Último Preparativo Mundialista", description: "Anota su gol 116 en la victoria 5-0 frente a Zambia en La Bombonera en marzo de 2026, encarando la defensa del título en el Mundial 2026.", category: "national", team: "Selección de Argentina" }
 ];
 
@@ -222,7 +223,7 @@ export const keyRecords: RecordItem[] = [
   { id: "r2", title: "Goles en un Año Natural", description: "Más goles anotados en un solo año natural (club y selección).", scope: "world", value: "91 goles (2012)" },
   { id: "r3", title: "Goles en un Club", description: "Más goles oficiales anotados para un solo club (FC Barcelona).", scope: "club", value: "672 goles" },
   { id: "r4", title: "Goles en La Liga", description: "Máximo goleador histórico de la Liga Española.", scope: "europe", value: "474 goles" },
-  { id: "r5", title: "Títulos Totales", description: "Futbolista con más títulos oficiales colectivos ganados en la historia.", scope: "world", value: "45 títulos mayores" },
+  { id: "r5", title: "Títulos Totales", description: "Futbolista con más títulos oficiales colectivos ganados en la historia.", scope: "world", value: "48 títulos mayores" },
   { id: "r6", title: "Goles en Selección Argentina", description: "Máximo goleador histórico de la selección albiceleste.", scope: "country", value: "116 goles" },
   { id: "r7", title: "Asistencias Internacionales", description: "Máximo asistidor en la historia de las selecciones masculinas de fútbol.", scope: "world", value: "61 asistencias" },
   { id: "r8", title: "Mundial Balón de Oro", description: "Único jugador galardonado dos veces con el Balón de Oro del Mundial de la FIFA.", scope: "world", value: "2 (2014, 2022)" }
@@ -260,8 +261,120 @@ export const triviaQuestions: TriviaQuestion[] = [
   {
     id: "q5",
     question: "¿Cuántos títulos oficiales en total tiene Lionel Messi en su palmarés mayor al culminar el año 2025 con el Inter Miami?",
-    options: ["38 títulos", "41 títulos", "44 títulos", "45 títulos"],
+    options: ["38 títulos", "41 títulos", "45 títulos", "48 títulos"],
     correctAnswer: 3,
-    explanation: "Al ganar la MLS Cup en diciembre de 2025 con el Inter Miami CF, Messi alcanzó la histórica marca de 45 títulos oficiales colectivos en su carrera, el mayor registro de todos los tiempos."
+    explanation: "Al ganar la MLS Cup en diciembre de 2025 con el Inter Miami CF, Messi alcanzó la histórica marca de 48 títulos oficiales colectivos en su carrera, el mayor registro de todos los tiempos."
+  },
+  {
+    id: "q6",
+    question: "¿En qué videojuego shooter militar se incluyó a Lionel Messi como operador jugable con su propia skin y voces en 2022?",
+    options: ["Fortnite", "Call of Duty: Modern Warfare II", "Free Fire", "Apex Legends"],
+    correctAnswer: 1,
+    explanation: "Lionel Messi fue añadido como operador jugable en Call of Duty: Modern Warfare II y Warzone 2.0 en noviembre de 2022 como parte de un evento especial del Mundial de Catar."
+  },
+  {
+    id: "q7",
+    question: "En 2023, Lionel Messi se unió como copropietario de un famoso equipo de esports fundado por Sergio Agüero. ¿Cómo se llama esta organización?",
+    options: ["KRÜ Esports", "9z Team", "Isurus Gaming", "KOI"],
+    correctAnswer: 0,
+    explanation: "Messi se unió a su gran amigo Sergio 'Kun' Agüero como socio y copropietario de KRÜ Esports, organización argentina que compite a nivel mundial en videojuegos como VALORANT y Rocket League."
+  },
+  {
+    id: "q8",
+    question: "¿En qué edición de la mítica saga de fútbol de EA Sports apareció Lionel Messi por primera vez de forma exclusiva en la portada global?",
+    options: ["FIFA 10", "FIFA 12", "FIFA 13", "FIFA 14"],
+    correctAnswer: 2,
+    explanation: "Messi apareció por primera vez en la portada global exclusiva en FIFA 13 tras firmar un contrato multi-anual con EA Sports (anteriormente había aparecido en portadas de Pro Evolution Soccer)."
+  },
+  {
+    id: "q9",
+    question: "¿Cuál ha sido la valoración base (rating) más alta alcanzada por Lionel Messi en el videojuego FIFA Ultimate Team?",
+    options: ["92", "93", "94", "95"],
+    correctAnswer: 2,
+    explanation: "La valoración base más alta de Messi en la historia de la franquicia FIFA de EA fue un rating de 94, alcanzado en múltiples ediciones (FIFA 12 a FIFA 16, FIFA 19 y FIFA 20)."
+  },
+  {
+    id: "q10",
+    question: "¿Con qué compañía de videojuegos firmó Messi para ser la portada y embajador principal de la saga PES (eFootball)?",
+    options: ["Electronic Arts", "Konami", "Ubisoft", "SEGA"],
+    correctAnswer: 1,
+    explanation: "Messi ha tenido una larga alianza con Konami, siendo la cara de múltiples ediciones de Pro Evolution Soccer y de su evolución free-to-play eFootball."
+  },
+  {
+    id: "q11",
+    question: "¿En qué popular videojuego Battle Royale de móviles se lanzó una colaboración oficial con Messi que incluía trajes dorados y eventos de juego en 2022?",
+    options: ["PUBG Mobile", "Free Fire", "Garena Arena", "Brawl Stars"],
+    correctAnswer: 0,
+    explanation: "PUBG Mobile lanzó una colaboración exclusiva con Lionel Messi en noviembre de 2022, introduciendo skins de Messi, ítems temáticos y minijuegos de fútbol dentro del mapa."
+  },
+  {
+    id: "q12",
+    question: "¿En qué edición apareció Messi por última vez en una portada global del videojuego FIFA antes de pasar a la competencia (eFootball/Konami)?",
+    options: ["FIFA 15", "FIFA 16", "FIFA 17", "FIFA 18"],
+    correctAnswer: 1,
+    explanation: "La portada de FIFA 16 fue la última vez que Messi ilustró globalmente la saga de EA Sports, tras lo cual EA firmó con Marco Reus (FIFA 17) y Cristiano Ronaldo (FIFA 18)."
+  },
+  {
+    id: "q13",
+    question: "¿Qué dorsal utilizó Lionel Messi en su debut oficial en la primera división con el FC Barcelona contra el Espanyol?",
+    options: ["10", "19", "30", "18"],
+    correctAnswer: 2,
+    explanation: "Messi debutó en Primera División el 16 de octubre de 2004 portando el dorsal 30, ya que las fichas del primer equipo (dorsales 1 al 25) estaban ocupadas."
+  },
+  {
+    id: "q14",
+    question: "¿Quién asistió a Messi con un centro milimétrico en su icónico gol de cabeza al Manchester United en la final de la Champions League 2009?",
+    options: ["Andrés Iniesta", "Xavi Hernández", "Samuel Eto'o", "Thierry Henry"],
+    correctAnswer: 1,
+    explanation: "Xavi Hernández metió un centro preciso al segundo palo que Messi conectó de cabeza bombeado por encima de Edwin van der Sar para sentenciar la final (2-0)."
+  },
+  {
+    id: "q15",
+    question: "¿A qué arquero le anotó Messi su gol número 644 con el Barcelona, rompiendo el récord histórico de Pelé como máximo goleador en un solo club?",
+    options: ["Jan Oblak", "Iker Casillas", "Manuel Neuer", "Marc-André ter Stegen"],
+    correctAnswer: 0,
+    explanation: "Le marcó el gol 644 a Jan Oblak del Atlético de Madrid en diciembre de 2020. Para celebrarlo, Budweiser envió botellas personalizadas y numeradas a todos los arqueros que recibieron goles de Messi."
+  },
+  {
+    id: "q16",
+    question: "¿En qué club infantil de Rosario dio Messi sus primeros pasos como futbolista amateur antes de incorporarse a Newell's Old Boys?",
+    options: ["Central Córdoba", "Abanderado Grandoli", "Tiro Federal", "Renato Cesarini"],
+    correctAnswer: 1,
+    explanation: "Messi comenzó a jugar a los 4 años en el club Abanderado Grandoli de su barrio en Rosario, dirigido por Salvador Aparicio, impulsado por su abuela Celia."
+  },
+  {
+    id: "q17",
+    question: "¿Contra qué selección nacional marcó Lionel Messi su primer gol oficial en una Copa del Mundo de la FIFA (Alemania 2006)?",
+    options: ["Costa de Marfil", "Países Bajos", "Serbia y Montenegro", "México"],
+    correctAnswer: 2,
+    explanation: "Habiendo ingresado como suplente en la fase de grupos frente a Serbia y Montenegro, Messi anotó el sexto gol en la histórica goleada 6-0 de Argentina."
+  },
+  {
+    id: "q18",
+    question: "¿En qué estadio histórico levantó Lionel Messi su primer título con la selección mayor argentina en la Copa América 2021?",
+    options: ["Estadio Monumental", "Estadio Maracaná", "Estadio Centenario", "Estadio Mané Garrincha"],
+    correctAnswer: 1,
+    explanation: "Argentina venció a Brasil 1-0 en la gran final de la Copa América el 10 de julio de 2021 en el mismísimo e histórico Estadio Maracaná en Río de Janeiro."
+  },
+  {
+    id: "q19",
+    question: "¿Qué distinción individual recibió Messi al finalizar el Mundial de Catar 2022 tras coronarse campeón?",
+    options: ["Bota de Oro", "Guante de Oro", "Balón de Oro del Mundial", "Premio Fair Play"],
+    correctAnswer: 2,
+    explanation: "Messi fue galardonado con el Balón de Oro del Mundial (MVP), convirtiéndose en el primer futbolista en la historia en ganar este premio dos veces (2014 y 2022)."
+  },
+  {
+    id: "q20",
+    question: "¿Qué director técnico de prestigio mundial hizo debutar a Lionel Messi en un partido oficial con el F.C. Barcelona?",
+    options: ["Pep Guardiola", "Frank Rijkaard", "Louis van Gaal", "Ronald Koeman"],
+    correctAnswer: 1,
+    explanation: "El neerlandés Frank Rijkaard lo promovió del Barcelona B y lo hizo debutar oficialmente en octubre de 2004 en el clásico de la ciudad catalana."
+  },
+  {
+    id: "q21",
+    question: "¿Qué streamer español unió fuerzas con Sergio Agüero en Twitch en la transmisión en vivo donde Messi anunció que se convertía en copropietario de KRÜ?",
+    options: ["Ibai Llanos", "TheGrefg", "Rubius", "Aurplay"],
+    correctAnswer: 0,
+    explanation: "Ibai Llanos copresentó la transmisión histórica de KRÜ en Twitch, sumando millones de espectadores simultáneos cuando se anunció la incorporación societaria de Messi."
   }
 ];

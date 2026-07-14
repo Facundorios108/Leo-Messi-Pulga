@@ -74,3 +74,40 @@ export interface TriviaQuestion {
   correctAnswer: number; // Index of correct option (0-3)
   explanation: string;
 }
+
+export interface CareerTotalsContainer {
+  career: CareerTotals;
+  clubs: {
+    "FC Barcelona": { appearances: number; goals: number; assists: number };
+    "Paris Saint-Germain": { appearances: number; goals: number; assists: number };
+    "Inter Miami CF": { appearances: number; goals: number; assists: number };
+    [key: string]: { appearances: number; goals: number; assists: number };
+  };
+  internationalBreakdown: {
+    "FIFA World Cup": { appearances: number; goals: number; assists: number };
+    "Copa América": { appearances: number; goals: number; assists: number };
+    "FIFA World Cup Qualifiers": { appearances: number; goals: number; assists: number };
+    "Finalissima": { appearances: number; goals: number; assists: number };
+    "International Friendlies": { appearances: number; goals: number; assists: number };
+    [key: string]: { appearances: number; goals: number; assists: number };
+  };
+  internationalYearly: { year: number; appearances: number; goals: number; assists: number }[];
+  detailed?: DetailedStats;
+}
+
+export interface VideoItem {
+  id: string;
+  title: string;
+  date: string;
+  category: string;
+  youtubeId: string;
+  duration: string;
+  description: string;
+  ratingSum: number;
+  ratingCount: number;
+  stats?: {
+    distanceYards?: number;
+    defendersBeaten?: number;
+    maxSpeedKmph?: number;
+  };
+}

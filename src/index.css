@@ -9,7 +9,7 @@
   /* --- Typography --- */
   --text-high-contrast: #f8fafc;
   --text-body: #cbd5e1;
-  --text-muted: #64748b;
+  --text-muted: #94a3b8; /* Improved contrast for WCAG AA conformance */
 
   --font-serif: 'Bodoni Moda', serif;
   --font-display: 'Outfit', sans-serif;
@@ -27,9 +27,6 @@
   --accent-miami-pink-glow: rgba(247, 181, 205, 0.15);
   
   --accent-barca-red: #a50044;
-  --accent-barca-red-glow: rgba(165, 0, 68, 0.15);
-
-  /* Default theme context values (swapped dynamically) */
   --theme-accent: var(--accent-gold);
   --theme-glow: var(--accent-gold-glow);
 
@@ -93,6 +90,33 @@
   --glass-bg: rgba(12, 24, 40, 0.75);
 }
 
+.theme-cr7 {
+  --theme-accent: #ef4444; /* CR7 Red */
+  --theme-glow: rgba(239, 68, 68, 0.35);
+  --color-space-black: #080303;
+  --color-slate-deep: #1a0808;
+  --color-slate-light: #2d0e0e;
+  --glass-bg: rgba(26, 8, 8, 0.75);
+}
+
+.theme-pele {
+  --theme-accent: #10b981; /* Pelé Green/Yellow */
+  --theme-glow: rgba(16, 185, 129, 0.35);
+  --color-space-black: #020805;
+  --color-slate-deep: #061a0d;
+  --color-slate-light: #0e2d17;
+  --glass-bg: rgba(6, 26, 13, 0.75);
+}
+
+.theme-maradona {
+  --theme-accent: #38bdf8; /* Maradona Sky Blue */
+  --theme-glow: rgba(56, 189, 248, 0.35);
+  --color-space-black: #020710;
+  --color-slate-deep: #051224;
+  --color-slate-light: #0b2244;
+  --glass-bg: rgba(5, 18, 36, 0.75);
+}
+
 /* --- Smooth Theme Transitions --- */
 .app-container,
 body,
@@ -141,8 +165,17 @@ body {
   min-height: 100vh;
   min-height: -webkit-fill-available;
   position: relative;
+  background-color: var(--color-space-black);
   background-image: radial-gradient(circle at top right, var(--theme-glow), transparent 60%);
   transition: background-image 0.6s ease;
+}
+
+/* Focus styles for keyboard navigability */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--theme-accent);
+  outline-offset: 2px;
 }
 
 /* Scroll Customization */
@@ -154,7 +187,6 @@ body {
 ::-webkit-scrollbar-track {
   background: var(--color-space-black);
 }
-
 ::-webkit-scrollbar-thumb {
   background: var(--color-slate-light);
   border-radius: 10px;
@@ -162,6 +194,16 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--theme-accent);
+  box-shadow: 0 0 10px var(--theme-accent);
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 /* Typography Helpers */
@@ -171,46 +213,61 @@ h1, h2, h3, h4 {
 
 .hero-title {
   font-family: var(--font-serif);
-  font-size: clamp(2rem, 5vw + 1rem, 3.2rem);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  font-size: clamp(2.6rem, 6vw + 1rem, 4rem);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  color: var(--text-high-contrast);
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
 }
 
 .section-title {
-  font-family: var(--font-serif);
-  font-size: clamp(1.4rem, 3vw + 1rem, 2.2rem);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  margin-bottom: var(--spacing-md);
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 2vw + 0.8rem, 1.6rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-high-contrast);
+  border-left: 3px solid var(--theme-accent);
+  padding-left: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  transition: border-color 0.5s ease;
 }
 
 .label-caps {
-  font-family: var(--font-display);
-  font-size: 11px;
+  font-family: var(--font-mono);
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--theme-accent);
+  opacity: 0.95;
+  transition: color 0.5s ease;
 }
 
 /* Glassmorphism Containers */
 .glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
-  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--theme-border);
+  box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
-              border-color 0.3s ease,
+              border-color 0.5s ease,
               box-shadow 0.3s ease;
 }
 
 .glass-panel:hover {
-  border-color: var(--glass-border-highlight);
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.6);
-  transform: translateY(-2px);
+  border-color: var(--theme-accent);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.65),
+    0 0 20px var(--theme-glow-primary),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transform: translateY(-3px);
 }
 
 /* Sticky Bottom Navigation */
@@ -221,14 +278,16 @@ h1, h2, h3, h4 {
   right: 0;
   height: calc(64px + var(--safe-area-inset-bottom));
   padding-bottom: var(--safe-area-inset-bottom);
-  background: rgba(5, 7, 12, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--glass-border);
+  background: rgba(5, 7, 12, 0.7);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-top: 1px solid var(--theme-border);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   display: flex;
   justify-content: space-around;
   align-items: center;
   z-index: 100;
+  transition: border-color 0.5s ease, background-color 0.5s ease;
 }
 
 .nav-item {
@@ -276,7 +335,7 @@ h1, h2, h3, h4 {
   top: 0;
   left: 0;
   right: 0;
-  height: 60px;
+  height: 54px; /* Reduced from 60px */
   padding: 0 var(--spacing-md);
   display: flex;
   align-items: center;
@@ -304,6 +363,19 @@ h1, h2, h3, h4 {
   transition: color 0.3s ease;
 }
 
+.header-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  border: 1px solid var(--theme-accent);
+  background: var(--theme-glow-primary);
+  color: var(--theme-accent);
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 /* Animations */
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -319,6 +391,11 @@ h1, h2, h3, h4 {
   0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
   70% { box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
   100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .animated-fade-in {
@@ -352,5 +429,267 @@ h1, h2, h3, h4 {
     max-width: 1000px;
     padding-left: var(--spacing-xl);
     padding-right: var(--spacing-xl);
+  }
+}
+
+/* Custom premium scrollbar for horizontal stats chart */
+.chart-scroll-container::-webkit-scrollbar {
+  height: 4px; /* Very thin, elegant scrollbar */
+  display: block;
+}
+.chart-scroll-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+}
+.chart-scroll-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(to right, var(--theme-accent), var(--accent-miami-pink));
+  border-radius: 10px;
+}
+.chart-scroll-container {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-x !important;
+  scrollbar-width: thin;
+  scrollbar-color: var(--theme-accent) rgba(255, 255, 255, 0.02);
+}
+
+/* Scroll Fade Indicators */
+.chart-fade-left {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 12px; /* stay above scrollbar */
+  width: 32px;
+  background: linear-gradient(to right, rgba(5, 7, 12, 0.95) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 0.3s ease;
+}
+.chart-fade-right {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 12px;
+  width: 32px;
+  background: linear-gradient(to left, rgba(5, 7, 12, 0.95) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 0.3s ease;
+}
+
+/* --- Scroll-driven Timeline Reveal --- */
+@supports ((animation-timeline: view()) and (animation-range: entry)) {
+  @keyframes revealCard {
+    from {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Target all glass panels inside a timeline container */
+  .timeline-container-animate .glass-panel {
+    animation: revealCard auto linear both;
+    animation-timeline: view();
+    animation-range: entry 10% cover 30%;
+  }
+}
+
+/* --- Hero Avatar premium rotated look --- */
+.profile-avatar-container {
+  width: 76px;
+  height: 76px;
+  border-radius: 12px;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--theme-accent), var(--accent-albiceleste));
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 15px var(--theme-glow-primary);
+  transform: rotate(-6deg);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.profile-avatar-container:hover {
+  transform: rotate(0deg) scale(1.08);
+}
+.profile-hero-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  object-fit: cover;
+  background-color: var(--color-slate-deep);
+}
+
+/* --- Animated Radial Progress Rings --- */
+.animated-ring {
+  stroke-dasharray: 100;
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* --- Museum Pedestal Trivia Choices --- */
+.option-btn {
+  width: 100%;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.option-btn:active {
+  transform: scale(0.97);
+}
+
+.option-btn.selected {
+  border-color: var(--theme-accent);
+  box-shadow: 0 0 20px var(--theme-glow-primary);
+  background: var(--theme-glow-primary);
+}
+
+.option-btn.correct {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.08);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+.option-btn.incorrect {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+}
+
+.option-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* --- Spring Animation for Feedback Panel --- */
+@keyframes springSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.feedback-panel {
+  animation: springSlideDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* --- Gold Dust Particle Effect --- */
+.score-circle-celebrate {
+  position: relative;
+  animation: pulseGold 2s infinite;
+}
+
+.gold-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, var(--accent-gold) 100%);
+  box-shadow: 0 0 8px var(--accent-gold);
+  pointer-events: none;
+  opacity: 0;
+  animation: particleFloat 1.8s ease-out infinite;
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    transform: translate(
+      var(--tx, 0px),
+      var(--ty, -25px)
+    ) scale(0);
+    opacity: 0;
+  }
+}
+
+/* --- Premium Dialog Modal --- */
+dialog {
+  border: none;
+  background: transparent;
+  max-width: 90%;
+  width: 420px;
+  max-height: 80vh;
+  margin: auto;
+  border-radius: 20px;
+  outline: none;
+}
+
+dialog::backdrop {
+  background: rgba(5, 7, 12, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Open states and starting styles for top layer animation */
+dialog[open] {
+  opacity: 1;
+  transform: scale(1);
+
+  @starting-style {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+dialog {
+  opacity: 0;
+  transform: scale(0.9);
+  transition-property: opacity, transform, display, overlay;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition-behavior: allow-discrete;
+}
+
+dialog::backdrop {
+  background-color: rgba(5, 7, 12, 0);
+  transition:
+    display 0.3s allow-discrete,
+    overlay 0.3s allow-discrete,
+    background-color 0.3s ease-out;
+}
+
+dialog[open]::backdrop {
+  background-color: rgba(5, 7, 12, 0.85);
+
+  @starting-style {
+    background-color: rgba(5, 7, 12, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog {
+    transform: none;
+    transition-duration: 0.1s;
+  }
+  @starting-style {
+    dialog[open] {
+      transform: none;
+    }
+  }
+  .feedback-panel {
+    animation: fadeIn 0.1s ease forwards;
+  }
+  .gold-particle {
+    display: none;
   }
 }

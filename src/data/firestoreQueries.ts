@@ -34,7 +34,12 @@ export async function fetchCareerTotals(): Promise<{
     const docRef = doc(db, "player", "totals");
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return docSnap.data() as any;
+      return docSnap.data() as {
+        career: CareerTotals;
+        clubs: typeof rawData.clubTotals;
+        internationalBreakdown: typeof rawData.internationalStatsBreakdown;
+        internationalYearly: typeof rawData.internationalYearlyStats;
+      };
     }
   } catch (error) {
     console.error("Failed to fetch career totals from Firestore, falling back to local bundle: ", error);

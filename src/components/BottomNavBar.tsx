@@ -12,6 +12,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ currentTab, setTab }
         className={`nav-item ${currentTab === 'home' ? 'active' : ''}`}
         onClick={() => setTab('home')}
         aria-label="Home"
+        aria-current={currentTab === 'home' ? 'page' : undefined}
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -24,6 +25,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ currentTab, setTab }
         className={`nav-item ${currentTab === 'stats' ? 'active' : ''}`}
         onClick={() => setTab('stats')}
         aria-label="Estadísticas"
+        aria-current={currentTab === 'stats' ? 'page' : undefined}
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <line x1="18" y1="20" x2="18" y2="10" />
@@ -34,21 +36,50 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ currentTab, setTab }
       </button>
 
       <button 
+        className={`nav-item ${currentTab === 'videos' ? 'active' : ''}`}
+        onClick={() => setTab('videos')}
+        aria-label="Teatro de Magia"
+        aria-current={currentTab === 'videos' ? 'page' : undefined}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3" />
+        </svg>
+        <span>MAGIA</span>
+      </button>
+
+      <button 
+        className={`nav-item ${currentTab === 'versus' ? 'active' : ''}`}
+        onClick={() => setTab('versus')}
+        aria-label="Comparar Leyendas"
+        aria-current={currentTab === 'versus' ? 'page' : undefined}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        <span>VS</span>
+      </button>
+
+      <button 
         className={`nav-item ${currentTab === 'timeline' ? 'active' : ''}`}
         onClick={() => setTab('timeline')}
         aria-label="Línea de Tiempo"
+        aria-current={currentTab === 'timeline' ? 'page' : undefined}
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <circle cx="12" cy="12" r="10" />
           <polyline points="12 6 12 12 16 14" />
         </svg>
-        <span>TIMELINE</span>
+        <span>TIME</span>
       </button>
 
       <button 
         className={`nav-item ${currentTab === 'cabinet' ? 'active' : ''}`}
         onClick={() => setTab('cabinet')}
         aria-label="Vitrina de Trofeos"
+        aria-current={currentTab === 'cabinet' ? 'page' : undefined}
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
@@ -57,13 +88,14 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ currentTab, setTab }
           <path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34" />
           <path d="M12 2a4 4 0 0 0-4 4v7a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z" />
         </svg>
-        <span>CABINET</span>
+        <span>COPA</span>
       </button>
 
       <button 
         className={`nav-item ${currentTab === 'game' ? 'active' : ''}`}
         onClick={() => setTab('game')}
         aria-label="Juego Trivia"
+        aria-current={currentTab === 'game' ? 'page' : undefined}
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path d="M6 12h4M10 8v8" />
@@ -71,7 +103,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ currentTab, setTab }
           <circle cx="17" cy="10" r="1" fill="currentColor" />
           <circle cx="15" cy="13" r="1" fill="currentColor" />
         </svg>
-        <span>GAME</span>
+        <span>TRIVIA</span>
       </button>
     </nav>
   );

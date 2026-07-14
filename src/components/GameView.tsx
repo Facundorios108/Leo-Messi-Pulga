@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { TriviaQuestion } from '../types';
 
 interface GameViewProps {
@@ -6,13 +6,33 @@ interface GameViewProps {
 }
 
 export const GameView: React.FC<GameViewProps> = ({ questions }) => {
+  const [activeQuestions, setActiveQuestions] = useState<TriviaQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [showResults, setShowResults] = useState(false);
 
-  if (questions.length === 0) {
+  // Pick 6 random questions and shuffle them
+  const initializeGame = () => {
+    if (questions.length > 0) {
+      const shuffled = [...questions].sort(() => 0.5 - Math.random());
+      setActiveQuestions(shuffled.slice(0, 6));
+    }
+    setCurrentIndex(0);
+    setSelectedOption(null);
+    setIsSubmitted(false);
+    setScore(0);
+    setShowResults(false);
+  };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    initializeGame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions]);
+
+  if (activeQuestions.length === 0) {
     return (
       <div className="skeleton-loader" style={{ padding: '24px', textAlign: 'center' }}>
         <div style={{ height: '20px', width: '200px', background: 'var(--color-slate-light)', margin: '0 auto 16px auto' }}></div>
@@ -22,7 +42,7 @@ export const GameView: React.FC<GameViewProps> = ({ questions }) => {
     );
   }
 
-  const currentQuestion = questions[currentIndex];
+  const currentQuestion = activeQuestions[currentIndex];
 
   const handleSelectOption = (idx: number) => {
     if (isSubmitted) return;
@@ -38,7 +58,7 @@ export const GameView: React.FC<GameViewProps> = ({ questions }) => {
   };
 
   const handleNext = () => {
-    if (currentIndex + 1 < questions.length) {
+    if (currentIndex + 1 < activeQuestions.length) {
       setCurrentIndex(prev => prev + 1);
       setSelectedOption(null);
       setIsSubmitted(false);
@@ -48,28 +68,43 @@ export const GameView: React.FC<GameViewProps> = ({ questions }) => {
   };
 
   const handleRestart = () => {
-    setCurrentIndex(0);
-    setSelectedOption(null);
-    setIsSubmitted(false);
-    setScore(0);
-    setShowResults(false);
+    initializeGame();
   };
 
   if (showResults) {
     return (
       <div className="screen-content animated-fade-in" style={{ textAlign: 'center', justifyContent: 'center' }}>
-        <div className="glass-panel" style={styles.resultsCard}>
-          <span style={{ fontSize: '48px' }}>🏆</span>
+        <div className="glass-panel" style={styles.resultsCard} role="status" aria-live="polite">
+          <span style={{ fontSize: '48px' }} aria-hidden="true">🏆</span>
           <h2 className="section-title" style={{ color: 'var(--theme-accent)', marginTop: '12px', marginBottom: '8px' }}>TRIVIA FINALIZADA</h2>
           <p style={{ color: 'var(--text-body)', fontSize: '15px', marginBottom: '24px' }}>
             Has completado la Trivia del GOAT.
           </p>
-          <div style={styles.scoreCircle}>
-            <span style={styles.scoreText}>{score} / {questions.length}</span>
+          <div className="score-circle-celebrate" style={styles.scoreCircle}>
+            <span style={styles.scoreText}>{score} / {activeQuestions.length}</span>
+            {/* Gold dust particles */}
+            {[...Array(12)].map((_, i) => {
+              const angle = (i * 2 * Math.PI) / 12;
+              const tx = `${Math.cos(angle) * 35}px`;
+              const ty = `${Math.sin(angle) * 35}px`;
+              return (
+                <div 
+                  key={i} 
+                  className="gold-particle" 
+                  style={{ 
+                    animationDelay: `${i * 0.1}s`,
+                    left: `${50 + Math.cos(angle) * 45}%`,
+                    top: `${50 + Math.sin(angle) * 45}%`,
+                    '--tx': tx,
+                    '--ty': ty
+                  } as React.CSSProperties}
+                />
+              );
+            })}
           </div>
           <p style={{ color: 'var(--text-muted)', fontSize: '12.5px', marginTop: '16px', marginBottom: '24px', lineHeight: '1.5' }}>
-            {score === questions.length ? '¡Increíble! Eres un verdadero experto del fútbol y de la Pulga.' :
-             score >= questions.length / 2 ? '¡Buen trabajo! Conoces bastante bien su legendaria carrera.' :
+            {score === activeQuestions.length ? '¡Increíble! Eres un verdadero experto del fútbol y de la Pulga.' :
+             score >= activeQuestions.length / 2 ? '¡Buen trabajo! Conoces bastante bien su legendaria carrera.' :
              '¡Sigue intentándolo! La carrera de Messi tiene muchos hitos por descubrir.'}
           </p>
           <button className="glass-panel" style={styles.actionButton} onClick={handleRestart}>
@@ -90,14 +125,14 @@ export const GameView: React.FC<GameViewProps> = ({ questions }) => {
       {/* Progress indicators */}
       <div style={styles.progressContainer}>
         <div style={styles.progressHeader}>
-          <span style={styles.progressLabel}>Pregunta {currentIndex + 1} de {questions.length}</span>
+          <span style={styles.progressLabel}>Pregunta {currentIndex + 1} de {activeQuestions.length}</span>
           <span style={styles.scoreTracker}>Puntos: {score}</span>
         </div>
         <div style={styles.progressBarTrack}>
           <div 
             style={{ 
               ...styles.progressBarFill, 
-              width: `${((currentIndex + 1) / questions.length) * 100}%` 
+              width: `${((currentIndex + 1) / activeQuestions.length) * 100}%` 
             }}
           ></div>
         </div>
@@ -109,31 +144,30 @@ export const GameView: React.FC<GameViewProps> = ({ questions }) => {
       </div>
 
       {/* Options Stack */}
-      <div style={styles.optionsList}>
+      <div style={styles.optionsList} role="radiogroup" aria-label="Opciones de respuesta">
         {currentQuestion.options.map((option, idx) => {
-          let btnStyle: React.CSSProperties = { ...styles.optionBtn };
-          
-          if (selectedOption === idx) {
-            btnStyle = { ...btnStyle, ...styles.selectedOption };
-          }
+          let btnClasses = "glass-panel option-btn";
+          if (selectedOption === idx) btnClasses += " selected";
           
           if (isSubmitted) {
             if (idx === currentQuestion.correctAnswer) {
-              btnStyle = { ...btnStyle, ...styles.correctOption };
+              btnClasses += " correct";
             } else if (selectedOption === idx) {
-              btnStyle = { ...btnStyle, ...styles.incorrectOption };
+              btnClasses += " incorrect";
             } else {
-              btnStyle = { ...btnStyle, ...styles.disabledOption };
+              btnClasses += " disabled";
             }
           }
 
           return (
             <button 
               key={idx}
-              className="glass-panel"
-              style={btnStyle}
+              className={btnClasses}
               onClick={() => handleSelectOption(idx)}
               disabled={isSubmitted}
+              aria-pressed={selectedOption === idx}
+              aria-label={`Opción ${String.fromCharCode(65 + idx)}: ${option}`}
+              style={{ minHeight: '44px' }}
             >
               <div style={styles.optionMarker}>
                 {String.fromCharCode(65 + idx)}
@@ -147,8 +181,8 @@ export const GameView: React.FC<GameViewProps> = ({ questions }) => {
       {/* Actions / Feedback */}
       <div style={styles.actionContainer}>
         {isSubmitted && (
-          <div className="glass-panel" style={styles.feedbackCard}>
-            <p style={{ fontWeight: 700, fontSize: '13px', color: selectedOption === currentQuestion.correctAnswer ? 'var(--accent-gold)' : '#ef4444', marginBottom: '6px' }}>
+          <div className="glass-panel feedback-panel" style={styles.feedbackCard} role="status" aria-live="polite">
+            <p style={{ fontWeight: 700, fontSize: '13px', color: selectedOption === currentQuestion.correctAnswer ? 'var(--theme-accent)' : '#ef4444', marginBottom: '6px' }}>
               {selectedOption === currentQuestion.correctAnswer ? '✓ ¡CORRECTO!' : '✗ INCORRECTO'}
             </p>
             <p style={styles.explanationText}>{currentQuestion.explanation}</p>
@@ -174,7 +208,7 @@ export const GameView: React.FC<GameViewProps> = ({ questions }) => {
             style={styles.actionButton}
             onClick={handleNext}
           >
-            {currentIndex + 1 === questions.length ? 'VER RESULTADOS' : 'SIGUIENTE PREGUNTA'}
+            {currentIndex + 1 === activeQuestions.length ? 'VER RESULTADOS' : 'SIGUIENTE PREGUNTA'}
           </button>
         )}
       </div>

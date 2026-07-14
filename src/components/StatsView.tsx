@@ -19,6 +19,7 @@ type FilterType = 'all' | 'barca' | 'psg' | 'miami' | 'argentina';
 
 export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals, setTheme, trophies }) => {
   const [filter, setFilter] = useState<FilterType>('all');
+  const [hoveredColIdx, setHoveredColIdx] = useState<number | null>(null);
 
   // Sync theme with active filter selection
   useEffect(() => {
@@ -92,7 +93,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals, setTheme,
         label: String(y.year),
         goals: y.goals,
         assists: y.assists
-      })).slice(-10); // Show last 10 active years
+      })); // Show all active years
     }
 
     // Filter seasons by selected team
@@ -118,8 +119,25 @@ export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals, setTheme,
       grouped[s.season].assists += s.assists;
     });
 
-    return Object.values(grouped).sort((a, b) => a.label.localeCompare(b.label)).slice(-10); // show last 10 entries
+    return Object.values(grouped).sort((a, b) => a.label.localeCompare(b.label)); // show all entries
   }, [filter, seasons, totals]);
+
+  const [scrollStatus, setScrollStatus] = useState({ left: false, right: true });
+
+  // Update scroll indicators on mount or data change
+  const updateScrollIndicators = () => {
+    const el = document.getElementById('stats-chart-scroll');
+    if (el) {
+      const isAtLeft = el.scrollLeft <= 5;
+      const isAtRight = el.scrollLeft + el.clientWidth >= el.scrollWidth - 5;
+      setScrollStatus({ left: !isAtLeft, right: !isAtRight });
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(updateScrollIndicators, 100);
+    return () => clearTimeout(timer);
+  }, [barChartData]);
 
   // Find max goals to scale chart
   const maxVal = useMemo(() => {
@@ -192,6 +210,26 @@ export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals, setTheme,
     return [];
   }, [filter, trophies]);
 
+  // Calculate relative percentages for progress rings
+  const ringPercentages = useMemo(() => {
+    if (!totals) {
+      return { appearances: 0, goals: 0, assists: 0 };
+    }
+    if (filter === 'all') {
+      return { appearances: 100, goals: 100, assists: 100 };
+    }
+
+    const totalApps = totals.career.appearances;
+    const totalGoals = totals.career.goals;
+    const totalAssists = totals.career.assists;
+
+    return {
+      appearances: totalApps ? Math.round((filteredData.appearances / totalApps) * 100) : 0,
+      goals: totalGoals ? Math.round((filteredData.goals / totalGoals) * 100) : 0,
+      assists: totalAssists ? Math.round((filteredData.assists / totalAssists) * 100) : 0
+    };
+  }, [filter, totals, filteredData]);
+
   // Handle active class styles
   const activeStyle = (type: FilterType) => {
     return filter === type ? styles.activeFilter : {};
@@ -205,12 +243,47 @@ export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals, setTheme,
       </p>
 
       {/* Filter Pills */}
-      <div style={styles.filterContainer}>
-        <button className="glass-panel" style={{ ...styles.filterPill, ...activeStyle('all') }} onClick={() => setFilter('all')}>GLOBAL</button>
-        <button className="glass-panel" style={{ ...styles.filterPill, ...activeStyle('barca') }} onClick={() => setFilter('barca')}>BARÇA</button>
-        <button className="glass-panel" style={{ ...styles.filterPill, ...activeStyle('argentina') }} onClick={() => setFilter('argentina')}>ARGENTINA</button>
-        <button className="glass-panel" style={{ ...styles.filterPill, ...activeStyle('psg') }} onClick={() => setFilter('psg')}>PSG</button>
-        <button className="glass-panel" style={{ ...styles.filterPill, ...activeStyle('miami') }} onClick={() => setFilter('miami')}>MIAMI</button>
+      <div className="hide-scrollbar" style={styles.filterContainer}>
+        <button 
+          className="glass-panel" 
+          style={{ ...styles.filterPill, ...activeStyle('all') }} 
+          onClick={() => setFilter('all')}
+          aria-pressed={filter === 'all'}
+        >
+          GLOBAL
+        </button>
+        <button 
+          className="glass-panel" 
+          style={{ ...styles.filterPill, ...activeStyle('barca') }} 
+          onClick={() => setFilter('barca')}
+          aria-pressed={filter === 'barca'}
+        >
+          BARÇA
+        </button>
+        <button 
+          className="glass-panel" 
+          style={{ ...styles.filterPill, ...activeStyle('argentina') }} 
+          onClick={() => setFilter('argentina')}
+          aria-pressed={filter === 'argentina'}
+        >
+          ARGENTINA
+        </button>
+        <button 
+          className="glass-panel" 
+          style={{ ...styles.filterPill, ...activeStyle('psg') }} 
+          onClick={() => setFilter('psg')}
+          aria-pressed={filter === 'psg'}
+        >
+          PSG
+        </button>
+        <button 
+          className="glass-panel" 
+          style={{ ...styles.filterPill, ...activeStyle('miami') }} 
+          onClick={() => setFilter('miami')}
+          aria-pressed={filter === 'miami'}
+        >
+          MIAMI
+        </button>
       </div>
 
       {/* Radial Metric Rings / Core Stats */}
@@ -221,7 +294,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals, setTheme,
           <div style={styles.radialItem}>
             <svg style={styles.svgRing} viewBox="0 0 36 36">
               <path style={styles.svgBg} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              <path style={{ ...styles.svgFill, stroke: 'var(--accent-albiceleste)' }} strokeDasharray="90, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path style={{ ...styles.svgFill, stroke: 'var(--accent-albiceleste)' }} strokeDasharray={`${ringPercentages.appearances}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
             </svg>
             <div style={styles.radialText}>
               <span style={styles.radialNumber}>{filteredData.appearances}</span>
@@ -233,7 +306,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals, setTheme,
           <div style={styles.radialItem}>
             <svg style={styles.svgRing} viewBox="0 0 36 36">
               <path style={styles.svgBg} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              <path style={{ ...styles.svgFill, stroke: 'var(--accent-gold)' }} strokeDasharray="80, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path style={{ ...styles.svgFill, stroke: 'var(--accent-gold)' }} strokeDasharray={`${ringPercentages.goals}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
             </svg>
             <div style={styles.radialText}>
               <span style={{ ...styles.radialNumber, color: 'var(--accent-gold)' }}>{filteredData.goals}</span>
@@ -245,7 +318,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals, setTheme,
           <div style={styles.radialItem}>
             <svg style={styles.svgRing} viewBox="0 0 36 36">
               <path style={styles.svgBg} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              <path style={{ ...styles.svgFill, stroke: 'var(--accent-miami-pink)' }} strokeDasharray="70, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path style={{ ...styles.svgFill, stroke: 'var(--accent-miami-pink)' }} strokeDasharray={`${ringPercentages.assists}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
             </svg>
             <div style={styles.radialText}>
               <span style={{ ...styles.radialNumber, color: 'var(--accent-miami-pink)' }}>{filteredData.assists}</span>
@@ -293,40 +366,84 @@ export const StatsView: React.FC<StatsViewProps> = ({ seasons, totals, setTheme,
       {/* Performance Chart */}
       <section className="glass-panel" style={styles.chartCard}>
         <h3 className="section-title" style={{ fontSize: '1.2rem', marginBottom: '20px' }}>RENDIMIENTO DE TEMPORADAS RECIENTES</h3>
-        <div style={styles.chartContainer}>
-          {barChartData.map((data, index) => (
-            <div key={index} style={styles.chartCol}>
-              <div style={styles.barTrack}>
-                {/* Goals Bar */}
-                <div 
-                  style={{ 
-                    ...styles.barFill, 
-                    height: `${(data.goals / maxVal) * 82}%`,
-                    background: 'linear-gradient(to top, var(--theme-accent), rgba(255, 255, 255, 0.1))'
-                  }} 
-                  title={`${data.goals} Goles`}
-                >
-                  <span style={styles.barValue}>{data.goals}</span>
+        
+        <div style={{ position: 'relative' }}>
+          <div className="chart-fade-left" style={{ opacity: scrollStatus.left ? 1 : 0 }}></div>
+          <div className="chart-fade-right" style={{ opacity: scrollStatus.right ? 1 : 0 }}></div>
+          
+          {/* Responsive, horizontally scrollable container */}
+          <div 
+            id="stats-chart-scroll"
+            className="chart-scroll-container" 
+            style={styles.chartContainer}
+            onScroll={(e) => {
+              const target = e.currentTarget;
+              const isAtLeft = target.scrollLeft <= 5;
+              const isAtRight = target.scrollLeft + target.clientWidth >= target.scrollWidth - 5;
+              setScrollStatus({ left: !isAtLeft, right: !isAtRight });
+            }}
+          >
+            {barChartData.map((data, index) => {
+            const isHovered = hoveredColIdx === index;
+            return (
+              <div 
+                key={index} 
+                style={styles.chartCol}
+                onMouseEnter={() => setHoveredColIdx(index)}
+                onMouseLeave={() => setHoveredColIdx(null)}
+              >
+                <div style={styles.barTrack}>
+                  {/* Goals Bar */}
+                  <div 
+                    style={{ 
+                      ...styles.barFill, 
+                      height: `${(data.goals / maxVal) * 82}%`,
+                      background: 'linear-gradient(to top, var(--theme-accent), rgba(255, 255, 255, 0.1))'
+                    }} 
+                    title={`${data.goals} Goles`}
+                  >
+                    <span 
+                      style={{ 
+                        ...styles.barValue,
+                        opacity: isHovered ? 1 : 0,
+                        transform: 'translateX(-50%)' + (isHovered ? ' translateY(-2px)' : ''),
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {data.goals}
+                    </span>
+                  </div>
+                  {/* Assists Bar */}
+                  <div 
+                    style={{ 
+                      ...styles.barFill, 
+                      height: `${(data.assists / maxVal) * 82}%`,
+                      background: 'linear-gradient(to top, var(--accent-miami-pink), rgba(247, 181, 205, 0.4))'
+                    }} 
+                    title={`${data.assists} Asistencias`}
+                  >
+                    <span 
+                      style={{ 
+                        ...styles.barValue,
+                        opacity: isHovered ? 1 : 0,
+                        transform: 'translateX(-50%)' + (isHovered ? ' translateY(-2px)' : ''),
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {data.assists}
+                    </span>
+                  </div>
                 </div>
-                {/* Assists Bar */}
-                <div 
-                  style={{ 
-                    ...styles.barFill, 
-                    height: `${(data.assists / maxVal) * 82}%`,
-                    background: 'linear-gradient(to top, var(--accent-miami-pink), rgba(247, 181, 205, 0.4))'
-                  }} 
-                  title={`${data.assists} Asistencias`}
-                >
-                  <span style={styles.barValue}>{data.assists}</span>
-                </div>
+                <span style={styles.chartLabel}>
+                  {data.label.replace('20', '')}
+                </span>
               </div>
-              <span style={styles.chartLabel}>
-                {data.label.replace('20', '')}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
-        <div style={styles.chartLegend}>
+      </div>
+      
+      <div style={styles.chartLegend}>
           <div style={styles.legendItem}>
             <div style={{ ...styles.legendDot, background: 'var(--theme-accent)' }}></div>
             <span>Goles</span>
@@ -373,12 +490,12 @@ const styles: Record<string, React.CSSProperties> = {
   },
   filterPill: {
     flexShrink: 0,
-    padding: '8px 16px',
+    padding: '10px 18px', /* Increased padding for better touch target */
     border: '1px solid var(--glass-border)',
     borderRadius: '20px',
     background: 'rgba(24, 32, 56, 0.25)',
     color: 'var(--text-muted)',
-    fontSize: '11px',
+    fontSize: '12px',
     fontWeight: 700,
     fontFamily: 'var(--font-display)',
     letterSpacing: '0.05em',
@@ -401,15 +518,17 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     justifyContent: 'space-around',
     width: '100%',
-    margin: '12px 0'
+    margin: '12px 0',
+    gap: '8px'
   },
   radialItem: {
     position: 'relative',
-    width: '90px',
-    height: '90px',
+    width: 'clamp(76px, 22vw, 90px)', /* Responsive scaling prevents layout breaking on small viewports */
+    height: 'clamp(76px, 22vw, 90px)',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    flexShrink: 0
   },
   svgRing: {
     width: '100%',
@@ -433,16 +552,17 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    textAlign: 'center'
+    textAlign: 'center',
+    width: '100%'
   },
   radialNumber: {
     fontFamily: 'var(--font-display)',
-    fontSize: '1.25rem',
+    fontSize: 'clamp(1rem, 3.5vw, 1.25rem)', /* Responsive font scaling */
     fontWeight: 700,
     color: 'var(--text-high-contrast)'
   },
   radialLabel: {
-    fontSize: '9px',
+    fontSize: 'clamp(8px, 2vw, 9px)', /* Responsive font scaling */
     color: 'var(--text-muted)',
     textTransform: 'uppercase',
     fontWeight: 600,
@@ -483,30 +603,37 @@ const styles: Record<string, React.CSSProperties> = {
   },
   chartCard: {
     padding: '24px 20px',
-    marginBottom: '20px'
+    marginBottom: '20px',
+    overflow: 'hidden'
   },
   chartContainer: {
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     alignItems: 'flex-end',
     height: '140px',
     margin: '16px 0 8px 0',
     padding: '0 4px',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.06)'
+    borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+    overflowX: 'auto', /* Enables horizontal scrolling on narrow screens */
+    WebkitOverflowScrolling: 'touch', /* Smooth touch momentum scrolling in iOS */
+    gap: '6px'
   },
   chartCol: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    flex: 1,
-    height: '100%'
+    flex: '0 0 auto',
+    height: '100%',
+    width: '48px', /* Ensure each column maintains a comfortable width */
+    minWidth: '48px', /* Prevent squishing on mobile views */
+    cursor: 'pointer'
   },
   barTrack: {
     display: 'flex',
     gap: '3px',
     alignItems: 'flex-end',
     height: '100%',
-    width: '80%',
+    width: '100%',
     justifyContent: 'center',
     paddingBottom: '4px'
   },
@@ -529,7 +656,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: '20px',
     textAlign: 'center',
     left: '50%',
-    transform: 'translateX(-50%)'
+    pointerEvents: 'none'
   },
   chartLabel: {
     fontFamily: 'var(--font-mono)',
