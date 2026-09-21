@@ -2,10 +2,12 @@ name: Update Messi Stats
 
 on:
   schedule:
-    # Run twice a day (at 00:00 and 12:00 UTC)
-    - cron: '0 0,12 * * *'
+    # Jueves a las 10:00 hs ART (13:00 UTC)
+    - cron: '0 13 * * 4'
+    # Domingos a las 23:59 hs ART (02:59 UTC del Lunes)
+    - cron: '59 2 * * 1'
   workflow_dispatch:
-    # Allow manual triggering from GitHub Actions tab
+    # Permite la ejecución manual desde la pestaña Actions en GitHub
 
 jobs:
   update-stats:
